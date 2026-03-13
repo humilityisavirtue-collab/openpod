@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "openpod"
+version = "0.2.0"
+description = "OpenPod — K-104 semantic routing + inter-agent communication. 104 rooms, 48x cheaper than Opus, zero deps."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    { name = "Kit Malthaner" },
+]
+keywords = ["ai", "routing", "cost-optimization", "llm", "claude", "openai", "gemini", "openpod", "k-104"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.optional-dependencies]
+crypto = ["cryptography>=41.0"]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+openpod = "openpod.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/openpod"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/openpod/rooms.claw" = "openpod/rooms.claw"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
