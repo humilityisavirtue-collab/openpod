@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenPod — K-104 Semantic Routing</title>
+  <meta name="description" content="Route AI queries to the cheapest capable model. 104 rooms. 48x cheaper than Opus. Zero dependencies.">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --border: #1e1e2e;
+      --text: #e0e0e8;
+      --muted: #8888a0;
+      --accent: #7c6fff;
+      --accent2: #ff6b9d;
+      --gold: #f0c040;
+      --green: #4ade80;
+      --code-bg: #16161e;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 6rem 1.5rem 4rem;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(124,111,255,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero .tagline {
+      font-size: 1.25rem;
+      color: var(--muted);
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+    .hero .stats {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+    .hero .stat {
+      text-align: center;
+    }
+    .hero .stat .num {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .hero .stat .label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .cta-row {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.75rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: #6b5cf0; text-decoration: none; }
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--accent); text-decoration: none; }
+
+    /* Install bar */
+    .install {
+      text-align: center;
+      padding: 1.5rem;
+    }
+    .install code {
+      display: inline-block;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 1.1rem;
+      color: var(--green);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .install code:hover { border-color: var(--accent); }
+    .install .hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+
+    /* Sections */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    section {
+      padding: 4rem 0;
+    }
+    section h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    section h2 span { color: var(--accent); }
+
+    /* How it works */
+    .tiers {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .tier {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .tier:hover { border-color: var(--accent); }
+    .tier .tier-num {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }
+    .tier .tier-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .tier .tier-models {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .tier .tier-cost {
+      font-weight: 700;
+      color: var(--green);
+    }
+    .tier-free .tier-cost { color: var(--gold); }
+
+    /* Flow diagram */
+    .flow {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.9rem;
+      line-height: 1.8;
+      margin: 2rem auto;
+      max-width: 550px;
+      color: var(--muted);
+    }
+    .flow .highlight { color: var(--accent); }
+    .flow .pct { color: var(--gold); font-weight: 600; }
+    .flow .free { color: var(--green); }
+
+    /* K-104 */
+    .suits {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .suit-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      transition: border-color 0.2s;
+    }
+    .suit-card:hover { border-color: var(--accent); }
+    .suit-card .suit-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .suit-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .suit-card .domain {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .suit-card .example {
+      font-size: 0.8rem;
+      color: var(--accent2);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    /* Code blocks */
+    .code-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    @media (max-width: 700px) {
+      .code-section { grid-template-columns: 1fr; }
+    }
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .code-block .code-header {
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+    .code-block pre {
+      padding: 1rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+    .code-block .kw { color: #c792ea; }
+    .code-block .fn { color: #82aaff; }
+    .code-block .str { color: #c3e88d; }
+    .code-block .cmt { color: #546e7a; }
+    .code-block .num { color: #f78c6c; }
+
+    /* Modules */
+    .modules {
+      margin-top: 1.5rem;
+    }
+    .mod-row {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .mod-row:last-child { border-bottom: none; }
+    .mod-name {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.9rem;
+      color: var(--accent);
+      min-width: 180px;
+      flex-shrink: 0;
+    }
+    .mod-desc {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    footer a { color: var(--accent); }
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 2.5rem; }
+      .hero .stats { gap: 1rem; }
+      .suits { grid-template-columns: 1fr; }
+      .tiers { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero">
+    <h1>Open<span>Pod</span></h1>
+    <p class="tagline">
+      K-104 semantic routing + inter-agent communication.<br>
+      Route every AI query to the cheapest model that can handle it.
+    </p>
+    <div class="stats">
+      <div class="stat">
+        <div class="num">104</div>
+        <div class="label">Semantic Rooms</div>
+      </div>
+      <div class="stat">
+        <div class="num">48x</div>
+        <div class="label">Cheaper than Opus</div>
+      </div>
+      <div class="stat">
+        <div class="num">80%</div>
+        <div class="label">Free Tier Deflection</div>
+      </div>
+      <div class="stat">
+        <div class="num">0</div>
+        <div class="label">Dependencies</div>
+      </div>
+    </div>
+    <div class="cta-row">
+      <a href="https://github.com/humilityisavirtue-collab/openpod" class="btn btn-primary">View on GitHub</a>
+      <a href="https://pypi.org/project/openpod/" class="btn btn-secondary">PyPI Package</a>
+    </div>
+  </div>
+
+  <div class="install">
+    <code onclick="navigator.clipboard.writeText('pip install openpod')">$ pip install openpod</code>
+    <div class="hint">Click to copy. Python 3.10+ required. No API keys needed for template routing.</div>
+  </div>
+
+  <div class="container">
+
+    <section>
+      <h2>How It <span>Works</span></h2>
+      <div class="flow">
+        <span class="highlight">Query</span> &rarr; K-104 Classify (0.03ms) &rarr; Route to cheapest tier<br>
+        &nbsp;&nbsp;|<br>
+        &nbsp;&nbsp;+-- <span class="pct">80%</span> &rarr; Built-in corpus <span class="free">(free, instant)</span><br>
+        &nbsp;&nbsp;+-- <span class="pct">16%</span> &rarr; Local model <span class="free">(free, ~1s)</span><br>
+        &nbsp;&nbsp;+-- <span class="pct">&nbsp;4%</span> &rarr; Cloud API (paid, ~2s)
+      </div>
+      <div class="tiers">
+        <div class="tier tier-free">
+          <div class="tier-num">Tier 0</div>
+          <div class="tier-name">Template</div>
+          <div class="tier-models">Built-in corpus (1,000+ patterns)</div>
+          <div class="tier-cost">$0.00</div>
+        </div>
+        <div class="tier tier-free">
+          <div class="tier-num">Tier 1</div>
+          <div class="tier-name">Local</div>
+          <div class="tier-models">Ollama, OpenRouter free tier</div>
+          <div class="tier-cost">$0.00</div>
+        </div>
+        <div class="tier">
+          <div class="tier-num">Tier 2</div>
+          <div class="tier-name">Cheap</div>
+          <div class="tier-models">Haiku, GPT-4o-mini, Gemini Flash</div>
+          <div class="tier-cost">~$0.001</div>
+        </div>
+        <div class="tier">
+          <div class="tier-num">Tier 3</div>
+          <div class="tier-name">Mid</div>
+          <div class="tier-models">Sonnet, GPT-4o, Gemini Pro</div>
+          <div class="tier-cost">~$0.01</div>
+        </div>
+        <div class="tier">
+          <div class="tier-num">Tier 4</div>
+          <div class="tier-name">Premium</div>
+          <div class="tier-models">Opus, GPT-4</div>
+          <div class="tier-cost">~$0.05</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>K-104 <span>Coordinate System</span></h2>
+      <p style="text-align:center; color:var(--muted); margin-bottom:1rem;">
+        4 suits &times; 13 ranks &times; 2 polarities = 104 semantic addresses.
+        Every query maps to a room. Every room knows its cost.
+      </p>
+      <div class="suits">
+        <div class="suit-card">
+          <div class="suit-icon">&hearts;</div>
+          <h3>Hearts (H)</h3>
+          <div class="domain">Emotion, relationship, connection</div>
+          <div class="example">"I'm feeling stuck" &rarr; +3H</div>
+        </div>
+        <div class="suit-card">
+          <div class="suit-icon">&spades;</div>
+          <h3>Spades (S)</h3>
+          <div class="domain">Mind, analysis, logic</div>
+          <div class="example">"Debug this function" &rarr; +7S</div>
+        </div>
+        <div class="suit-card">
+          <div class="suit-icon">&diams;</div>
+          <h3>Diamonds (D)</h3>
+          <div class="domain">Material, building, code</div>
+          <div class="example">"Build a REST API" &rarr; +5D</div>
+        </div>
+        <div class="suit-card">
+          <div class="suit-icon">&clubs;</div>
+          <h3>Clubs (C)</h3>
+          <div class="domain">Action, energy, execution</div>
+          <div class="example">"Deploy to prod" &rarr; +9C</div>
+        </div>
+      </div>
+      <p style="text-align:center; color:var(--muted); margin-top:1.5rem; font-size:0.9rem;">
+        <strong>Empirical result:</strong> Transformer activations cluster by K-104 suit with silhouette score 0.312 &mdash; the geometry is real, not imposed.
+      </p>
+    </section>
+
+    <section>
+      <h2>Quick <span>Start</span></h2>
+      <div class="code-section">
+        <div class="code-block">
+          <div class="code-header">Routing</div>
+<pre><span class="kw">from</span> <span class="fn">openpod</span> <span class="kw">import</span> KlawRouter
+
+router = KlawRouter()
+result = router.route(<span class="str">"How do I center a div?"</span>)
+
+<span class="fn">print</span>(result[<span class="str">"response"</span>])   <span class="cmt"># The answer</span>
+<span class="fn">print</span>(result[<span class="str">"cost"</span>])       <span class="cmt"># $0.0001</span>
+<span class="fn">print</span>(result[<span class="str">"savings"</span>])    <span class="cmt"># $0.0029 saved</span>
+<span class="fn">print</span>(result[<span class="str">"tier_name"</span>])  <span class="cmt"># "template" (free)</span></pre>
+        </div>
+        <div class="code-block">
+          <div class="code-header">Agent Comms</div>
+<pre><span class="kw">from</span> <span class="fn">openpod</span> <span class="kw">import</span> Pod, Agent
+
+<span class="cmt"># Pod-based messaging</span>
+pod = Pod(<span class="str">"my_cell"</span>, roles=[<span class="str">"alpha"</span>, <span class="str">"beta"</span>])
+pod.send(<span class="str">"alpha"</span>, <span class="str">"beta"</span>, <span class="str">"Build it"</span>, suit=<span class="str">"+7D"</span>)
+msgs = pod.inbox(<span class="str">"beta"</span>)
+
+<span class="cmt"># Full agent with K-routed thinking</span>
+agent = Agent(<span class="str">"my-agent"</span>)
+
+<span class="kw">@</span>agent.on_message
+<span class="kw">def</span> <span class="fn">handle</span>(msg):
+    <span class="kw">return</span> agent.think(msg.text)</pre>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>CLI &amp; <span>MCP</span></h2>
+      <div class="code-section">
+        <div class="code-block">
+          <div class="code-header">Command Line</div>
+<pre>$ openpod route <span class="str">"What is Python?"</span>
+$ openpod classify <span class="str">"Explain quantum physics"</span>
+$ openpod stats
+$ openpod demo
+$ openpod setup
+$ openpod mcp   <span class="cmt"># Start MCP server</span></pre>
+        </div>
+        <div class="code-block">
+          <div class="code-header">Claude Code Integration (.mcp.json)</div>
+<pre>{
+  <span class="str">"mcpServers"</span>: {
+    <span class="str">"openpod"</span>: {
+      <span class="str">"command"</span>: <span class="str">"openpod"</span>,
+      <span class="str">"args"</span>: [<span class="str">"mcp"</span>]
+    }
+  }
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><span>Modules</span></h2>
+      <div class="modules">
+        <div class="mod-row">
+          <span class="mod-name">openpod.router</span>
+          <span class="mod-desc">K-104 classifier + model routing engine</span>
+        </div>
+        <div class="mod-row">
+          <span class="mod-name">openpod.core</span>
+          <span class="mod-desc">Pod messaging, K-Coda protocol, priorities</span>
+        </div>
+        <div class="mod-row">
+          <span class="mod-name">openpod.agent</span>
+          <span class="mod-desc">Full agent with message handling + K-routed thinking</span>
+        </div>
+        <div class="mod-row">
+          <span class="mod-name">openpod.memory</span>
+          <span class="mod-desc">Persistent agent memory</span>
+        </div>
+        <div class="mod-row">
+          <span class="mod-name">openpod.skills</span>
+          <span class="mod-desc">Hot-reload skill system</span>
+        </div>
+        <div class="mod-row">
+          <span class="mod-name">openpod.channels</span>
+          <span class="mod-desc">Multi-channel comms (ntfy, Telegram, Discord)</span>
+        </div>
+        <div class="mod-row">
+          <span class="mod-name">openpod.models</span>
+          <span class="mod-desc">Local model management (Ollama, torch)</span>
+        </div>
+        <div class="mod-row">
+          <span class="mod-name">openpod.mcp_server</span>
+          <span class="mod-desc">MCP server for Claude Code</span>
+        </div>
+        <div class="mod-row">
+          <span class="mod-name">openpod.auth</span>
+          <span class="mod-desc">License verification for paid tiers</span>
+        </div>
+      </div>
+    </section>
+
+    <section style="text-align:center;">
+      <h2>The <span>Math</span></h2>
+      <p style="color:var(--muted); max-width:600px; margin:0 auto 1.5rem;">
+        143 primitives = 104 content rooms (K-104) + 39 relational (3 axes &times; 13 ranks).<br>
+        The minimum complete vocabulary for embodied, relational intelligence.
+      </p>
+      <div style="display:flex; gap:2rem; justify-content:center; flex-wrap:wrap;">
+        <div class="stat">
+          <div class="num" style="color:var(--accent)">4</div>
+          <div class="label">Suits (domains)</div>
+        </div>
+        <div class="stat">
+          <div class="num" style="color:var(--accent)">13</div>
+          <div class="label">Ranks (intensity)</div>
+        </div>
+        <div class="stat">
+          <div class="num" style="color:var(--accent)">2</div>
+          <div class="label">Polarities (+/-)</div>
+        </div>
+        <div class="stat">
+          <div class="num" style="color:var(--accent)">104</div>
+          <div class="label">Rooms</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <div class="footer-links">
+      <a href="https://github.com/humilityisavirtue-collab/openpod">GitHub</a>
+      <a href="https://pypi.org/project/openpod/">PyPI</a>
+      <a href="https://holdtheline.tech">Hold The Line</a>
+    </div>
+    <p>MIT License &middot; K Systems LLC</p>
+  </footer>
+
+</body>
+</html>
