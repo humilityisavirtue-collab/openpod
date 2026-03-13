@@ -32,17 +32,27 @@
     /* Hero */
     .hero {
       text-align: center;
-      padding: 6rem 1.5rem 4rem;
+      padding: 0;
       position: relative;
+      overflow: hidden;
     }
-    .hero::before {
-      content: '';
+    .hero-img {
+      width: 100%;
+      height: 480px;
+      object-fit: cover;
+      object-position: center 40%;
+      display: block;
+      filter: brightness(0.45);
+    }
+    .hero-overlay {
       position: absolute;
-      top: 0; left: 50%;
-      transform: translateX(-50%);
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(124,111,255,0.08) 0%, transparent 70%);
-      pointer-events: none;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      background: linear-gradient(to bottom, rgba(10,10,15,0.3) 0%, rgba(10,10,15,0.7) 100%);
     }
     .hero h1 {
       font-size: 3.5rem;
@@ -103,6 +113,45 @@
       border: 1px solid var(--border);
     }
     .btn-secondary:hover { border-color: var(--accent); text-decoration: none; }
+
+    /* Whale quote */
+    .whale-quote {
+      font-style: italic;
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 1rem;
+      opacity: 0.8;
+    }
+    .whale-quote strong { color: var(--text); font-style: normal; }
+
+    /* Section whale images */
+    .section-whale {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto 2rem;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .section-whale img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Photo credit */
+    .photo-credit {
+      font-size: 0.7rem;
+      color: #555;
+      text-align: right;
+      padding: 0.25rem 0.5rem;
+      background: rgba(0,0,0,0.3);
+      margin-top: -1.8rem;
+      position: relative;
+      z-index: 1;
+    }
+    .photo-credit a { color: #666; }
 
     /* Install bar */
     .install {
@@ -316,41 +365,49 @@
     /* Responsive */
     @media (max-width: 600px) {
       .hero h1 { font-size: 2.5rem; }
+      .hero-img { height: 380px; }
       .hero .stats { gap: 1rem; }
       .suits { grid-template-columns: 1fr; }
       .tiers { grid-template-columns: 1fr 1fr; }
+      .section-whale img { height: 180px; }
     }
   </style>
 </head>
 <body>
 
   <div class="hero">
-    <h1>Open<span>Pod</span></h1>
-    <p class="tagline">
-      K-104 semantic routing + inter-agent communication.<br>
-      Route every AI query to the cheapest model that can handle it.
-    </p>
-    <div class="stats">
-      <div class="stat">
-        <div class="num">104</div>
-        <div class="label">Semantic Rooms</div>
+    <img class="hero-img"
+         src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Sperm_whale_pod.jpg/1280px-Sperm_whale_pod.jpg"
+         alt="A pod of sperm whales swimming together off the coast of Mauritius">
+    <div class="hero-overlay">
+      <h1>Open<span>Pod</span></h1>
+      <p class="tagline">
+        K-104 semantic routing + inter-agent communication.<br>
+        Route every AI query to the cheapest model that can handle it.
+      </p>
+      <div class="stats">
+        <div class="stat">
+          <div class="num">104</div>
+          <div class="label">Semantic Rooms</div>
+        </div>
+        <div class="stat">
+          <div class="num">48x</div>
+          <div class="label">Cheaper than Opus</div>
+        </div>
+        <div class="stat">
+          <div class="num">80%</div>
+          <div class="label">Free Tier Deflection</div>
+        </div>
+        <div class="stat">
+          <div class="num">0</div>
+          <div class="label">Dependencies</div>
+        </div>
       </div>
-      <div class="stat">
-        <div class="num">48x</div>
-        <div class="label">Cheaper than Opus</div>
+      <div class="cta-row">
+        <a href="https://github.com/humilityisavirtue-collab/openpod" class="btn btn-primary">View on GitHub</a>
+        <a href="https://pypi.org/project/openpod/" class="btn btn-secondary">PyPI Package</a>
       </div>
-      <div class="stat">
-        <div class="num">80%</div>
-        <div class="label">Free Tier Deflection</div>
-      </div>
-      <div class="stat">
-        <div class="num">0</div>
-        <div class="label">Dependencies</div>
-      </div>
-    </div>
-    <div class="cta-row">
-      <a href="https://github.com/humilityisavirtue-collab/openpod" class="btn btn-primary">View on GitHub</a>
-      <a href="https://pypi.org/project/openpod/" class="btn btn-secondary">PyPI Package</a>
+      <p class="whale-quote">An elephant never forgets. <strong>A pod never drops a signal.</strong></p>
     </div>
   </div>
 
@@ -403,6 +460,13 @@
         </div>
       </div>
     </section>
+
+    <div class="section-whale">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Mother_and_baby_sperm_whale.jpg/1280px-Mother_and_baby_sperm_whale.jpg"
+           alt="Mother sperm whale swimming with her calf off the coast of Mauritius"
+           style="object-position: center 30%;">
+      <div class="photo-credit">Photo: Gabriel Barathieu &middot; CC BY-SA 2.0</div>
+    </div>
 
     <section>
       <h2>K-104 <span>Coordinate System</span></h2>
@@ -543,6 +607,13 @@ $ openpod mcp   <span class="cmt"># Start MCP server</span></pre>
       </div>
     </section>
 
+    <div class="section-whale">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Sperm_whale_fluke.jpg/1280px-Sperm_whale_fluke.jpg"
+           alt="Sperm whale fluke rising from the ocean surface"
+           style="object-position: center 60%; height: 220px;">
+      <div class="photo-credit">NOAA &middot; Public Domain</div>
+    </div>
+
     <section style="text-align:center;">
       <h2>The <span>Math</span></h2>
       <p style="color:var(--muted); max-width:600px; margin:0 auto 1.5rem;">
@@ -578,6 +649,10 @@ $ openpod mcp   <span class="cmt"># Start MCP server</span></pre>
       <a href="https://holdtheline.tech">Hold The Line</a>
     </div>
     <p>MIT License &middot; K Systems LLC</p>
+    <p style="margin-top:0.75rem; font-size:0.7rem; color:#444;">
+      Whale photography: <a href="https://commons.wikimedia.org/wiki/File:Sperm_whale_pod.jpg">Gabriel Barathieu</a> (CC BY-SA 2.0) &middot;
+      <a href="https://commons.wikimedia.org/wiki/File:Sperm_whale_fluke.jpg">NOAA</a> (Public Domain)
+    </p>
   </footer>
 
 </body>
